@@ -91,7 +91,7 @@ purge_old_kernels() {
     fi
   done
 
-  if (( ${#purge_list[@]} == 0 ]]; then
+  if (( ${#purge_list[@]} == 0 )); then
     echo "No old kernels to purge."
     return 0
   fi
