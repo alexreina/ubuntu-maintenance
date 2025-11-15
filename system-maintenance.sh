@@ -131,11 +131,33 @@ snap_maintenance() {
   done
 }
 
+brew_maintenance() {
+  log "Homebrew maintenance (Linuxbrew)..."
+
+  if ! command -v brew >/dev/null 2>&1; then
+    echo "brew command not found; skipping Homebrew maintenance."
+    return 0
+  fi
+
+  echo "Updating Homebrew..."
+  brew update || echo "brew update failed, continuing..."
+
+  echo "Upgrading Homebrew packages..."
+  brew upgrade || echo "brew upgrade failed, continuing..."
+
+  echo "Autoremoving unused Homebrew dependencies..."
+  brew autoremove || echo "brew autoremove failed, continuing..."
+
+  echo "Cleaning Homebrew caches..."
+  brew cleanup -s || echo "brew cleanup failed, continuing..."
+}
+
 main() {
   require_root
 
   PURGE_KERNELS=false
   SNAP_MAINT=false
+  BREW_MAINT=false
 
   for arg in "$@"; do
     case "$arg" in
@@ -144,6 +166,9 @@ main() {
         ;;
       --purge-disabled-snaps)
         SNAP_MAINT=true
+        ;;
+      --brew-maintenance)
+        BREW_MAINT=true
         ;;
       *)
         ;;
@@ -166,6 +191,12 @@ main() {
     echo "Snap maintenance disabled (run with --purge-disabled-snaps to enable)."
   fi
 
+  if $BREW_MAINT; then
+    brew_maintenance
+  else
+    echo "Homebrew maintenance disabled (run with --brew-maintenance to enable)."
+  fi
+
   apt_sanity_check
 
   echo
@@ -173,4 +204,3 @@ main() {
 }
 
 main "$@"
-
